@@ -1,81 +1,100 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
-function GerenciadorEquipe() {
-  // 1. Estado composto: Um array de strings representando a equipe
-  const [membros, setMembros] = useState(['Arthur Silva', 'Beatriz Souza'])
-  
-  // 2. Estado do formulário: Controla o texto digitado no input
-  const [novoNome, setNovoNome] = useState('')
+function DashboardTarefas() {
+  // 1. Estados Principais
+  const [tarefas, setTarefas] = useState([])
+  const [carregando, setCarregando] = useState(true)
 
-  // 3. Manipulador do evento de submissão do formulário
-  function adicionarMembro(event) {
-    event.preventDefault() // Evita o comportamento padrão do HTML (recarregar a página)
-    
-    if (novoNome.trim() === '') return // Validação simples
+  // 2. O Hook useEffect (Simulando uma chamada de API / Banco de Dados)
+  useEffect(() => {
+    // Simulamos um delay de rede de 1.5 segundos
+    const timer = setTimeout(() => {
+      const dadosIniciais = [
+        { id: 1, titulo: 'Mapear tabelas do banco', concluida: true },
+        { id: 2, titulo: 'Configurar rotas da API', concluida: false },
+        { id: 3, titulo: 'Otimizar queries de busca', concluida: false },
+      ]
+      setTarefas(dadosIniciais)
+      setCarregando(false) // Desativa o estado de loading
+    }, 1500)
 
-    // CONCEITO CRUCIAL: Imutabilidade
-    // Não podemos usar membros.push(). Devemos criar um array totalmente novo.
-    // O operador spread (...) copia os membros atuais e adiciona o novoNome no final.
-    setMembros([...membros, novoNome])
-    
-    setNovoNome('') // Reseta o campo de texto (Controlled Component)
+    // Função de limpeza (Cleanup) - Boa prática para evitar memory leaks
+    return () => clearTimeout(timer)
+  }, []) // Array de dependências vazio = Executa APENAS UMA VEZ quando o componente nasce (mount)
+
+  // 3. Regra de Negócio: Inverter o status de concluída
+  function alternarTarefa(id) {
+    const novasTarefas = tarefas.map(tarefa => {
+      if (tarefa.id === id) {
+        return { ...tarefa, concluida: !tarefa.concluida }
+      }
+      return tarefa
+    })
+    setTarefas(novasTarefas)
+  }
+
+  // 4. CONCEITO AVANÇADO: Estado Derivado (Derived State)
+  // Não criamos um useState para isso! Calculamos em tempo de renderização.
+  const totalTarefas = tarefas.length
+  const tarefasConcluidas = tarefas.filter(t => t.concluida).length
+  const percentualConclusao = totalTarefas > 0 
+    ? Math.round((tarefasConcluidas / totalTarefas) * 100) 
+    : 0
+
+  // Renderização Condicional de Carregamento
+  if (carregando) {
+    return <div style={{ fontSize: '1.5rem', textAlign: 'center' }}>Carregando dados do servidor...</div>
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px', border: '1px solid #444', borderRadius: '8px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Membros da Equipe</h2>
+    <div style={{ width: '450px', margin: '0 auto', padding: '20px', backgroundColor: '#1e1e1e', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+      <h2 style={{ margin: '0 0 20px 0', textAlign: 'center' }}>System Tasks Dashboard</h2>
 
-      {/* Formulário Capturando o Input */}
-      <form onSubmit={adicionarMembro} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        <input
-          type="text"
-          placeholder="Nome do desenvolvedor..."
-          value={novoNome} // O valor do input é espelhado no estado
-          onChange={(e) => setNovoNome(e.target.value)} // Atualiza o estado a cada tecla digitada
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '4px',
-            border: '1px solid #666',
-            backgroundColor: '#222',
-            color: '#fff'
-          }}
-        />
-        <button 
-          type="submit"
-          style={{ padding: '10px 16px', backgroundColor: '#646cff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          Adicionar
-        </button>
-      </form>
+      {/* Seção de Métricas (Baseada no Estado Derivado) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#2d2d2d', padding: '15px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+        <div>Total: <strong>{totalTarefas}</strong></div>
+        <div>Concluídas: <strong>{tarefasConcluidas}</strong></div>
+        <div>Progresso: <strong style={{ color: '#4caf50' }}>{percentualConclusao}%</strong></div>
+      </div>
 
-      {/* Renderização da Lista Dinâmica */}
-      <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-        {membros.map((membro, index) => (
-          <li 
-            key={index} // Identificador único obrigatório para o algoritmo do React
+      {/* Lista de Tarefas */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {tarefas.map(tarefa => (
+          <div 
+            key={tarefa.id}
+            onClick={() => alternarTarefa(tarefa.id)}
             style={{
-              padding: '12px',
-              backgroundColor: '#1a1a1a',
-              marginBottom: '8px',
-              borderRadius: '4px',
-              borderLeft: '4px solid #646cff',
+              padding: '15px',
+              backgroundColor: tarefa.concluida ? '#142515' : '#2d2d2d',
+              border: tarefa.concluida ? '1px solid #2e7d32' : '1px solid #444',
+              borderRadius: '6px',
+              cursor: 'pointer',
               display: 'flex',
-              justifyContent: 'between'
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s ease'
             }}
           >
-            {membro}
-          </li>
+            <span style={{ textDecoration: tarefa.concluida ? 'line-through' : 'none', color: tarefa.concluida ? '#81c784' : '#fff' }}>
+              {tarefa.titulo}
+            </span>
+            <input 
+              type="checkbox" 
+              checked={tarefa.concluida} 
+              readOnly // O clique no container já gerencia o estado
+              style={{ cursor: 'pointer' }}
+            />
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <GerenciadorEquipe />
+    <DashboardTarefas />
   </React.StrictMode>
 )
