@@ -14,7 +14,7 @@ function Contador() {
   }
 
   return (
-    <div style={{ textAlign: 'center', border: '1px solid #444', padding: '40px', borderRadius: '12px' }}>
+    <div style={{ textAlign: 'center', border: '1px solid #444', padding: '80px', borderRadius: '12px' }}>
       <h2>Contador Acadêmico</h2>
       
       {/* Exibindo o valor do estado em tempo real */}
