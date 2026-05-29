@@ -1,0 +1,7 @@
+Analise da interface do Gmail (https://mail.google.com/) utilizando os conceitos do material de design.
+
+Na interface do Gmail a elevação zero esta presente no fundo principal da interface, utilizando uma cor neutra, no caso o branco. Os cards estao presentes na listagem de emails, os cards possuem profundidade com o efeitos de sombra, e espaçamento entre os elementos.
+O botão flutuante principal se encontra na sidebar ao lado esquerdo da interface, com a ação "Escrever" que destaca a funcionalidade do botão.
+O menu lateral (Drawer) em telas menores se sobrepoem com efeito de sombra ao conteudo principal, ja em telas maiores o menu permanece fixo e sem sobreposição
+
+
